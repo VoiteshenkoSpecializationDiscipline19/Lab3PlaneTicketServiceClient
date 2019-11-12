@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Orders";
+}
+
+<h3>Welcome, @ViewBag.userName</h3>
+
+<h4>Your booked flights</h4>
+
+<kendo-grid name="grid">
+    <datasource>
+        <transport>
+            <read url="/Orders/ReadData" />
+            <create url="/Orders/Create" type="POST" />
+            <update url="/Orders/Edit" type="POST" />
+            <destroy url="/Settlements/Delete" type="POST" />
+        </transport>
+        <schema data="data" total="total">
+            <model id="routeId">
+                <fields>
+                    <field name="routeFrom" type="string"></field>
+                    <field name="routeWhere" type="string"></field>
+                    <field name="routeDate" type="string"></field>
+                    <field name="routeTime" type="string" editable="false"></field>
+                    <field name="routePrice" type="string" @*editable="false"*@></field>
+                </fields>
+            </model>
+        </schema>
+    </datasource>
+    <editable mode="inline" />
+    <toolbar>
+        <toolbar-button name="create" text="Book new flight"></toolbar-button>
+    </toolbar>
+    <columns>
+        <column field="routeFrom" title="From" editor="fromEditor" />
+        <column field="routeWhere" title="To" editor="toEditor" />
+        <column field="routeDate" title="Flight date" editor="flightDateEditor" />
+        <column field="routeTime" title="Flight time" />
+        <column field="routePrice" title="Ticket price" />
+        <column>
+            <commands>
+                <column-command text="Edit" name="edit"></column-command>
+                <column-command text="Delete" name="destroy"></column-command>
+            </commands>
+        </column>
+    </columns>
+</kendo-grid>
+
+<script>
+        function fromEditor(container, options) {
+            var grid = $('#grid').data('kendoGrid');
+            $('<input required name="' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    dataSource: {
+                        data: grid.dataSource.data().map(function (x) {
+                            return x.routeFrom;
+                        })
+                    }
+                });
+        }
+
+        function toEditor(container, options) {
+            var grid = $('#grid').data('kendoGrid');
+            $('<input required name="' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    dataSource: {
+                        data: grid.dataSource.data().map(function (x) {
+                            return x.routeWhere;
+                        })
+                    }
+                });
+    }
+
+    function flightDateEditor(container, options) {
+        var grid = $('#grid').data('kendoGrid');
+        $('<input required name="' + options.field + '"/>')
+            .appendTo(container)
+            .kendoDropDownList({
+                dataSource: {
+                    data: grid.dataSource.data().map(function (x) {
+                        return x.routeDate;
+                    })
+                }
+            });
+    }
+</script>
