@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 
 namespace Lab3.Models
 {
     public class User
     {
-        public string userId { get; set; }
-        public string userEmail { get; set; }
-        public string userFirstName { get; set; }
-        public string userSecondName { get; set; }
+        [JsonProperty("userId")]
+        public string Id { get; set; }
+
+        [JsonProperty("firstName")]
+        public string FirstName { get; set; }
+
+        [JsonProperty("secondName")]
+        public string SecondName { get; set; }
     }
 }

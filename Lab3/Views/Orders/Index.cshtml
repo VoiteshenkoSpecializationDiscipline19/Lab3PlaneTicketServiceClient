@@ -12,16 +12,16 @@
             <read url="/Orders/ReadData" />
             <create url="/Orders/Create" type="POST" />
             <update url="/Orders/Edit" type="POST" />
-            <destroy url="/Settlements/Delete" type="POST" />
+            <destroy url="/Orders/Delete" type="POST" />
         </transport>
         <schema data="data" total="total">
-            <model id="routeId">
+            <model id="Id">
                 <fields>
-                    <field name="routeFrom" type="string"></field>
-                    <field name="routeWhere" type="string"></field>
-                    <field name="routeDate" type="string"></field>
-                    <field name="routeTime" type="string" editable="false"></field>
-                    <field name="routePrice" type="string" @*editable="false"*@></field>
+                    <field name="From" type="string"></field>
+                    <field name="To" type="string"></field>
+                    <field name="Date" type="string"></field>
+                    <field name="Time" type="string" editable="false"></field>
+                    <field name="Price" type="string" @*editable="false"*@></field>
                 </fields>
             </model>
         </schema>
@@ -31,11 +31,11 @@
         <toolbar-button name="create" text="Book new flight"></toolbar-button>
     </toolbar>
     <columns>
-        <column field="routeFrom" title="From" editor="fromEditor" />
-        <column field="routeWhere" title="To" editor="toEditor" />
-        <column field="routeDate" title="Flight date" editor="flightDateEditor" />
-        <column field="routeTime" title="Flight time" />
-        <column field="routePrice" title="Ticket price" />
+        <column field="From" title="From" editor="fromEditor" />
+        <column field="To" title="To" editor="toEditor" />
+        <column field="Date" title="Flight date" editor="flightDateEditor" />
+        <column field="Time" title="Flight time" />
+        <column field="Price" title="Ticket price" />
         <column>
             <commands>
                 <column-command text="Edit" name="edit"></column-command>
@@ -53,7 +53,7 @@
                 .kendoDropDownList({
                     dataSource: {
                         data: grid.dataSource.data().map(function (x) {
-                            return x.routeFrom;
+                            return x.From;
                         })
                     }
                 });
@@ -66,7 +66,7 @@
                 .kendoDropDownList({
                     dataSource: {
                         data: grid.dataSource.data().map(function (x) {
-                            return x.routeWhere;
+                            return x.To;
                         })
                     }
                 });
@@ -79,7 +79,7 @@
             .kendoDropDownList({
                 dataSource: {
                     data: grid.dataSource.data().map(function (x) {
-                        return x.routeDate;
+                        return x.Date;
                     })
                 }
             });
