@@ -26,19 +26,29 @@ namespace Lab3.Controllers
         [HttpPost]
         public async Task<IActionResult> Authorize([Bind("Id")] User user)
         {
-            var payment = await PaymentController.payForMethodAsync(
-                new MethodDateUsage(DateTime.Now, DateTime.Now.AddHours(1.0)), "getUser");
+            var payment = await PaymentController.PayForMethod(
+                new MethodDateUsage(DateTime.Now, DateTime.Now), "getUser");
 
-            if(payment is ErrorViewModel)
-                return View("~/Views/Shared/Error.cshtml", payment);
-            var token = (payment as PaymentResponse).Token;
-            string response = null;
-            using (var client = new HttpClient())
+            User userFullInfo = null;
+
+            if (payment is PaymentResponse)
             {
-                var uri = new Uri(initialUri + user.Id + "/" + token);
-                response = await client.GetStringAsync(uri);
+                var token = (payment as PaymentResponse).Token;
+                string response = null;
+                using (var client = new HttpClient())
+                {
+                    var uri = new Uri(initialUri + user.Id + "/" + token);
+                    response = await client.GetStringAsync(uri);
+                }
+                userFullInfo = JsonConvert.DeserializeObject<User>(response);
             }
-            var userFullInfo = JsonConvert.DeserializeObject<User>(response);
+            if (userFullInfo == null || payment is ErrorViewModel)
+            {
+                return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
+                {
+                    RequestId = "Error in method payment"
+                });
+            }
 
             TempData["userEmail"] = userFullInfo.Id;
             TempData["userName"] = userFullInfo.FirstName + " " + userFullInfo.SecondName;

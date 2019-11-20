@@ -6,8 +6,8 @@ namespace Lab3.Models
     {
         public MethodDateUsage(DateTime from, DateTime to)
         {
-            DateFrom = from.ToString();
-            DateTo = to.ToString();
+            DateFrom = from.ToString("d");
+            DateTo = to.ToString("d");
         }
 
         public string DateFrom { get; set; }

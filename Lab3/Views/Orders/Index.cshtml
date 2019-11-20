@@ -2,7 +2,7 @@
     ViewData["Title"] = "Orders";
 }
 
-<h3>Welcome, @ViewBag.userName</h3>
+<h3>@ViewBag.userMessage</h3>
 
 <h4>Your booked flights</h4>
 
@@ -15,13 +15,13 @@
             <destroy url="/Orders/Delete" type="POST" />
         </transport>
         <schema data="data" total="total">
-            <model id="Id">
+            <model id="routeId">
                 <fields>
-                    <field name="From" type="string"></field>
-                    <field name="To" type="string"></field>
-                    <field name="Date" type="string"></field>
-                    <field name="Time" type="string" editable="false"></field>
-                    <field name="Price" type="string" @*editable="false"*@></field>
+                    <field name="routeFrom" type="string"></field>
+                    <field name="routeWhere" type="string"></field>
+                    <field name="routeDate" type="string"></field>
+                    <field name="routeTime" type="string" editable="false"></field>
+                    <field name="routePrice" type="string" editable="false"></field>
                 </fields>
             </model>
         </schema>
@@ -31,11 +31,11 @@
         <toolbar-button name="create" text="Book new flight"></toolbar-button>
     </toolbar>
     <columns>
-        <column field="From" title="From" editor="fromEditor" />
-        <column field="To" title="To" editor="toEditor" />
-        <column field="Date" title="Flight date" editor="flightDateEditor" />
-        <column field="Time" title="Flight time" />
-        <column field="Price" title="Ticket price" />
+        <column field="routeFrom" title="From" editor="fromEditor" />
+        <column field="routeWhere" title="To" editor="toEditor" />
+        <column field="routeDate" title="Flight date" editor="flightDateEditor" />
+        <column field="routeTime" title="Flight time" />
+        <column field="routePrice" title="Ticket price, $" />
         <column>
             <commands>
                 <column-command text="Edit" name="edit"></column-command>
@@ -46,40 +46,68 @@
 </kendo-grid>
 
 <script>
+    var dataSource1 = new kendo.data.DataSource({
+        transport: {
+            read: {
+                url: "/Orders/ReadAllData"
+            }
+        },
+        schema: {
+            data:  "data",
+            total: "total",
+            model: {
+                fields: {
+                    routeFrom: {
+                        type: "string"
+                    },
+                    routeWhere: {
+                        type: "string"
+                    },
+                    routeDate: {
+                        type: "string"
+                    },
+                    routeTime: {
+                        type: "string"
+                    },
+                    routePrice: {
+                        type: "string"
+                    }
+                }
+            }
+        }
+    });
+    dataSource1.read();
         function fromEditor(container, options) {
-            var grid = $('#grid').data('kendoGrid');
             $('<input required name="' + options.field + '"/>')
                 .appendTo(container)
                 .kendoDropDownList({
                     dataSource: {
-                        data: grid.dataSource.data().map(function (x) {
-                            return x.From;
+                        data: dataSource1.data().map(function (x) {
+                            return x.routeFrom;
                         })
                     }
                 });
-        }
+    }
 
         function toEditor(container, options) {
-            var grid = $('#grid').data('kendoGrid');
             $('<input required name="' + options.field + '"/>')
                 .appendTo(container)
                 .kendoDropDownList({
                     dataSource: {
-                        data: grid.dataSource.data().map(function (x) {
-                            return x.To;
+                        data: dataSource1.data().map(function (x) {
+                            return x.routeWhere;
                         })
                     }
                 });
     }
 
     function flightDateEditor(container, options) {
-        var grid = $('#grid').data('kendoGrid');
         $('<input required name="' + options.field + '"/>')
             .appendTo(container)
             .kendoDropDownList({
                 dataSource: {
-                    data: grid.dataSource.data().map(function (x) {
-                        return x.Date;
+                    data: dataSource1.data().map(function (x) {
+                        return x.routeDate;
                     })
                 }
             });

@@ -7,10 +7,10 @@ namespace Lab3.Models
         [JsonProperty("userId")]
         public string Id { get; set; }
 
-        [JsonProperty("firstName")]
+        [JsonProperty("userFirstName")]
         public string FirstName { get; set; }
 
-        [JsonProperty("secondName")]
+        [JsonProperty("userSecondName")]
         public string SecondName { get; set; }
     }
 }

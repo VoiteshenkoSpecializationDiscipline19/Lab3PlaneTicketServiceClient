@@ -1,25 +1,29 @@
-﻿using Newtonsoft.Json;
-
-namespace Lab3.Models
+﻿namespace Lab3.Models
 {
     public class Route
     {
-        [JsonProperty("routeId")]
-        public string Id { get; set; }
+        public string routeId { get; set; }
+        public string routeFrom { get; set; }    
+        public string routeWhere { get; set; }        
+        public string routeDate { get; set; }      
+        public string routeTime { get; set; }      
+        public string routePrice { get; set; }
 
-        [JsonProperty("routeFrom")]
-        public string From { get; set; }
+        public Route(string routeFrom, string routeWhere, string routeDate)
+        {
+            this.routeFrom = routeFrom;
+            this.routeWhere = routeWhere;
+            this.routeDate = routeDate;
+        }
 
-        [JsonProperty("routeWhere")]
-        public string To { get; set; }
-
-        [JsonProperty("routeDate")]
-        public string Date { get; set; }
-
-        [JsonProperty("routeTime")]
-        public string Time { get; set; }
-
-        [JsonProperty("routePrice")]
-        public string Price { get; set; }
+        public Route()
+        {
+            routeId = null; 
+            routeFrom = null;
+            routeWhere = null;
+            routeDate = null;
+            routeTime = null;
+            routePrice = null;
+        }
     }
 }

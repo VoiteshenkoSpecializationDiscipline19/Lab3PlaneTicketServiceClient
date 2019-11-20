@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,54 +24,104 @@ namespace Lab3.Controllers
         }
         public IActionResult Index()
         {
-            ViewBag.userName = TempData["userName"];
-            userEmail = String.Copy(TempData["userEmail"].ToString());
+            ViewBag.userMessage = "Welcome, " + TempData["userName"];
+            userEmail = TempData["userEmail"].ToString();
             return View();
+        }
+
+        public async Task<IActionResult> ReadAllData([DataSourceRequest] DataSourceRequest request)
+        {
+            List<Route> routes = null;
+            List<Route> uniqueRoutes = null;
+
+            var payment = await PaymentController.PayForMethod(
+                new MethodDateUsage(DateTime.Now, DateTime.Now), "getFlightsInfo");
+
+            if (payment is PaymentResponse)
+            {
+                var token = (payment as PaymentResponse).Token;
+                string response = null;
+                using (var client = new HttpClient())
+                {
+                    var uri = new Uri(initialUri + "flights/" + token);
+                    response = await client.GetStringAsync(uri);
+                }
+                routes = JsonConvert.DeserializeObject<List<Route>>(response);
+                HashSet<string> from = new HashSet<string>();
+                HashSet<string> to = new HashSet<string>();
+                HashSet<string> dates = new HashSet<string>();
+                uniqueRoutes = new List<Route>();
+                foreach (var route in routes)
+                {
+                    from.Add(route.routeFrom);
+                    to.Add(route.routeWhere);
+                    dates.Add(route.routeDate);
+                }
+                var fromList = from.ToList();
+                var toList = to.ToList();
+                var dateList = dates.ToList();
+                for (int i = 0; i < fromList.Count; i++)
+                {
+                    uniqueRoutes.Add(new Route(fromList[i], toList[i], dateList[i]));
+                }
+            }
+            if (routes == null || payment is ErrorViewModel)
+            {
+                return View("Index");
+            }
+            return Json(uniqueRoutes.ToDataSourceResult(request));
         }
 
         public async Task<IActionResult> ReadData([DataSourceRequest] DataSourceRequest request)
         {
-            var payment = await PaymentController.payForMethodAsync(
-                new MethodDateUsage(DateTime.Now, DateTime.Now.AddHours(1.0)), "getFullUserFlightsInfo");
+            List<Route> orders = null;
 
-            if (payment is ErrorViewModel)
-                return View("~/Views/Shared/Error.cshtml", payment);
-            var token = (payment as PaymentResponse).Token;
+            var payment = await PaymentController.PayForMethod(
+                new MethodDateUsage(DateTime.Now, DateTime.Now), "getFullUserFlightsInfo");
 
-            string response = null;
-            using (var client = new HttpClient())
+            if (payment is PaymentResponse)
             {
-                var uri = new Uri(initialUri + "flights/" + userEmail + "/" + token);
-                response = await client.GetStringAsync(uri);
+                var token = (payment as PaymentResponse).Token;
+                string response = null;
+                using (var client = new HttpClient())
+                {
+                    var uri = new Uri(initialUri + "flights/" + userEmail + "/" + token);
+                    response = await client.GetStringAsync(uri);
+                }
+                orders = JsonConvert.DeserializeObject<List<Route>>(response);
             }
-            var orders = JsonConvert.DeserializeObject<List<Route>>(response);
-            orders[0].Time = "10:00";
-            orders[0].Price = "1150";
+            if (orders == null || payment is ErrorViewModel)
+            {
+                return View("Index");
+            }
             return Json(orders.ToDataSourceResult(request));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([DataSourceRequest] DataSourceRequest request, 
-            [Bind("From", "To", "Date")] Route route)
+        public async Task<IActionResult> Create([DataSourceRequest] DataSourceRequest request,
+            [Bind("routeFrom", "routeWhere", "routeDate")] Route route)
         {
-            var payment = await PaymentController.payForMethodAsync(
-              new MethodDateUsage(DateTime.Now, DateTime.Now.AddHours(1.0)), "addFlight");
+            var payment = await PaymentController.PayForMethod(
+              new MethodDateUsage(DateTime.Now, DateTime.Now), "addFlight");
 
-            if (payment is ErrorViewModel)
-                return View("~/Views/Shared/Error.cshtml", payment);
-
-            var token = (payment as PaymentResponse).Token;
-            HttpResponseMessage response = null;
-            using (var client = new HttpClient())
+            if (payment is PaymentResponse)
             {
-                var uri = new Uri(initialUri + "addFlight/" + userEmail + "/" + token);
-                var jsonRequest = JsonConvert.SerializeObject(route);
-                
-                response = await client.PostAsync(uri, 
-                    new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
-            }
+                var token = (payment as PaymentResponse).Token;
+                HttpResponseMessage response = null;
+                using (var client = new HttpClient())
+                {
+                    var uri = new Uri(initialUri + "addFlight/" + userEmail + "/" + token);
+                    var jsonRequest = JsonConvert.SerializeObject(route);
 
-            route = JsonConvert.DeserializeObject<Route>(await response.Content.ReadAsStringAsync());
+                    response = await client.PostAsync(uri,
+                        new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
+                }
+                route = JsonConvert.DeserializeObject<Route>(await response.Content.ReadAsStringAsync());
+            }
+            if (route == null || payment is ErrorViewModel)
+            {
+                return View("Index");
+            }
             return Json(new[] { route }.ToDataSourceResult(request, ModelState));
 
         }
@@ -78,51 +129,55 @@ namespace Lab3.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit([DataSourceRequest] DataSourceRequest request, Route route)
         {
-            var payment = await PaymentController.payForMethodAsync(
-              new MethodDateUsage(DateTime.Now, DateTime.Now.AddHours(1.0)), "updateFlight");
+            var payment = await PaymentController.PayForMethod(
+              new MethodDateUsage(DateTime.Now, DateTime.Now), "updateFlight");
 
-            if (payment is ErrorViewModel)
-                return View("~/Views/Shared/Error.cshtml", payment);
-
-            var token = (payment as PaymentResponse).Token;
-            HttpResponseMessage response = null;
-            if (ModelState.IsValid)
+            if (payment is PaymentResponse)
             {
-                using (var client = new HttpClient())
+                var token = (payment as PaymentResponse).Token;
+                HttpResponseMessage response = null;
+                if (ModelState.IsValid)
                 {
-                    var uri = new Uri(initialUri + "updateFlight/ " + userEmail +"/" + token);
-                    var jsonRequest = JsonConvert.SerializeObject(route);
+                    using (var client = new HttpClient())
+                    {
+                        var uri = new Uri(initialUri + "updateFlight/" + userEmail + "/" + token);
+                        var jsonRequest = JsonConvert.SerializeObject(route);
 
-                    response = await client.PostAsync(uri,
-                        new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
+                        response = await client.PostAsync(uri,
+                            new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
+                        route = JsonConvert.DeserializeObject<Route>(await response.Content.ReadAsStringAsync());
+                    }
                 }
             }
-            string s = await response.Content.ReadAsStringAsync();
-            route = JsonConvert.DeserializeObject<Route>(await response.Content.ReadAsStringAsync());
-            route.Time = "11:00";
+            if (route == null || payment is ErrorViewModel)
+            {
+                return View("Index");
+            }
             return Json(new[] { route }.ToDataSourceResult(request, ModelState));
         }
 
         [HttpPost]
         public async Task<IActionResult> Delete([DataSourceRequest] DataSourceRequest request, Route route)
         {
-            var payment = await PaymentController.payForMethodAsync(
-            new MethodDateUsage(DateTime.Now, DateTime.Now.AddHours(1.0)), "deleteFlight");
+            var payment = await PaymentController.PayForMethod(
+                new MethodDateUsage(DateTime.Now, DateTime.Now), "deleteFlight");
+            int code = 0;
 
-            if (payment is ErrorViewModel)
-                return View("~/Views/Shared/Error.cshtml", payment);
-
-            var token = (payment as PaymentResponse).Token;
-            using (var client = new HttpClient())
+            if (payment is PaymentResponse)
             {
-                var jsonRequest = JsonConvert.SerializeObject(route);
-                var uri = new Uri(initialUri + "deleteFlight/ " + userEmail + "/" + route.Id + "/" + token);
-
-                //var multipart = new MultipartContent();
-                //multipart.Add(new StringContent(userEmail.ToString()));
-                //multipart.Add(new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
-
-                //response = await client.PostAsync(uri, multipart);
+                var token = (payment as PaymentResponse).Token;
+                HttpResponseMessage response = null;
+                using (var client = new HttpClient())
+                {
+                    var uri = new Uri(initialUri + "deleteFlight/" + userEmail + "/" + route.routeId);
+                    var jsonRequest = JsonConvert.SerializeObject(token);
+                    response = await client.PostAsync(uri,  new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
+                    code = JsonConvert.DeserializeObject<int>(await response.Content.ReadAsStringAsync());
+                }
+            }
+            if (code == -1 || payment is ErrorViewModel)
+            {
+                return View("Index");
             }
             return Json(new[] { route }.ToDataSourceResult(request, ModelState));
         }

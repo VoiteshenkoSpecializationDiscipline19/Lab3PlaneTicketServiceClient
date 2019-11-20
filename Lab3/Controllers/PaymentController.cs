@@ -11,7 +11,7 @@ namespace Lab3.Models
     public class PaymentController
     {
         [HttpPost]
-        public static async Task<Object> payForMethodAsync(MethodDateUsage dates, string methodName)
+        public static async Task<Object> PayForMethod(MethodDateUsage dates, string methodName)
         {
             HttpResponseMessage response = null;
             using (var client = new HttpClient())
