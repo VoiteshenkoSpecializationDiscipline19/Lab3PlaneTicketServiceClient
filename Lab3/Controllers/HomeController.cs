@@ -1,20 +1,18 @@
 ﻿using Lab3.Models;
+using Lab3.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Lab3.Controllers
 {
     public class HomeController : Controller
     {
-        private String initialUri;
+        private IPlaneTicketService planeTicketService;
 
-        public HomeController(IConfiguration configuration)
+        public HomeController(IConfiguration configuration, IPlaneTicketService planeTicketService)
         {
-            initialUri = configuration["Service_uri"];
+            this.planeTicketService = planeTicketService;
         }
 
         [HttpGet]
@@ -24,34 +22,20 @@ namespace Lab3.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Authorize([Bind("Id")] User user)
+        public IActionResult Authorize([Bind("Id")] User user)
         {
-            var payment = await PaymentController.PayForMethod(
-                new MethodDateUsage(DateTime.Now, DateTime.Now), "getUser");
-
-            User userFullInfo = null;
-
-            if (payment is PaymentResponse)
-            {
-                var token = (payment as PaymentResponse).Token;
-                string response = null;
-                using (var client = new HttpClient())
-                {
-                    var uri = new Uri(initialUri + user.Id + "/" + token);
-                    response = await client.GetStringAsync(uri);
-                }
-                userFullInfo = JsonConvert.DeserializeObject<User>(response);
-            }
-            if (userFullInfo == null || payment is ErrorViewModel)
+            var authorizeResult = planeTicketService.AuthorizeAsync(user).Result;
+            if (authorizeResult is String error)
             {
                 return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
                 {
-                    RequestId = "Error in method payment"
+                    RequestId = error
                 });
             }
 
-            TempData["userEmail"] = userFullInfo.Id;
-            TempData["userName"] = userFullInfo.FirstName + " " + userFullInfo.SecondName;
+            var userInfo = authorizeResult as User;
+            TempData["userEmail"] = userInfo.Id;
+            TempData["userName"] = userInfo.FirstName + " " + userInfo.SecondName;
 
             return RedirectToAction("Index", "Orders");
         }

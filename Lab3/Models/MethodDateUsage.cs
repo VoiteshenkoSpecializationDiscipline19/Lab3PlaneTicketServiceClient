@@ -2,9 +2,9 @@
 
 namespace Lab3.Models
 {
-    public class MethodDateUsage
+    public class MethodUsageDates
     {
-        public MethodDateUsage(DateTime from, DateTime to)
+        public MethodUsageDates(DateTime from, DateTime to)
         {
             DateFrom = from.ToString("d");
             DateTo = to.ToString("d");
