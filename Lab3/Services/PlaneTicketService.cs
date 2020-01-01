@@ -10,16 +10,18 @@ using System.Threading.Tasks;
 
 namespace Lab3.Services
 {
-    public class PlaneTicketService: IPlaneTicketService
+    public class PlaneTicketService : IPlaneTicketService
     {
         private String baseUri;
+        private String authUri;
         private IPaymentService paymentService;
         private HttpClient client;
 
-        public PlaneTicketService(IConfiguration configuration, IHttpClientFactory clientFactory, 
+        public PlaneTicketService(IConfiguration configuration, IHttpClientFactory clientFactory,
             IPaymentService paymentService)
         {
             baseUri = configuration["PlaneTicketServiceUri"];
+            authUri = configuration["AuthorizationServiceUri"];
             this.paymentService = paymentService;
             client = clientFactory.CreateClient();
         }
@@ -33,7 +35,7 @@ namespace Lab3.Services
             if (payment is PaymentResponse)
             {
                 var token = (payment as PaymentResponse).Token;
-                string response = await client.GetStringAsync(new Uri(baseUri + user.Id + "/" + token));
+                string response = await client.GetStringAsync(new Uri(authUri + user.Id + "/" + token));
                 userFullInfo = JsonConvert.DeserializeObject<User>(response);
             }
             if (!paymentService.MethodPaymentIsSuccessful(userFullInfo, payment))
