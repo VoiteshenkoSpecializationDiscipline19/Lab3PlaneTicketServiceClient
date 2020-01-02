@@ -7,11 +7,11 @@ namespace Lab3.Services
 {
     public interface IPlaneTicketService
     {
-        Task<Object> AuthorizeAsync(User user);
+        Task<object> AuthorizeAsync(User user);
         Task<List<Route>> ReadAllData();
-        Task<List<Route>> ReadData(String userEmail);
-        Task<Route> Create(String userEmail, Route route);
-        Task<Route> Edit(String userEmail, Route route);
-        Task<Route> Delete(String userEmail, Route route);
+        Task<List<Route>> ReadData(string userEmail);
+        Task<Route> Create(string userEmail, Route route);
+        Task<Route> Edit(string userEmail, Route route);
+        Task<Route> Delete(string userEmail, Route route);
     }
 }

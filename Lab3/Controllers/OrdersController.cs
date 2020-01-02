@@ -3,13 +3,13 @@ using Kendo.Mvc.UI;
 using Lab3.Models;
 using Lab3.Services;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using System.Threading.Tasks;
 
 namespace Lab3.Controllers
 {
     public class OrdersController : Controller
     {
-        private static String userEmail;
+        private static string userEmail;
         private IPlaneTicketService planeTicketService;
 
         public OrdersController(IPlaneTicketService planeTicketService)
@@ -23,9 +23,9 @@ namespace Lab3.Controllers
             return View();
         }
 
-        public IActionResult ReadAllData([DataSourceRequest] DataSourceRequest request)
+        public async Task<IActionResult> ReadAllDataAsync([DataSourceRequest] DataSourceRequest request)
         {
-            var routes = planeTicketService.ReadAllData().Result;
+            var routes = await planeTicketService.ReadAllData();
             if (routes == null)
             {
                 return View("Index");
@@ -33,9 +33,9 @@ namespace Lab3.Controllers
             return Json(routes.ToDataSourceResult(request));
         }
 
-        public IActionResult ReadData([DataSourceRequest] DataSourceRequest request)
+        public async Task<IActionResult> ReadDataAsync([DataSourceRequest] DataSourceRequest request)
         {
-            var orders = planeTicketService.ReadData(userEmail).Result;
+            var orders = await planeTicketService.ReadData(userEmail);
             if (orders == null)
             {
                 return View("Index");
@@ -44,12 +44,12 @@ namespace Lab3.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([DataSourceRequest] DataSourceRequest request,
+        public async Task<IActionResult> CreateAsync([DataSourceRequest] DataSourceRequest request,
             [Bind("routeFrom", "routeWhere", "routeDate")] Route route)
         {
             if (ModelState.IsValid)
             {
-                route = planeTicketService.Create(userEmail, route).Result;
+                route = await planeTicketService.Create(userEmail, route);
                 if (route == null)
                 {
                     return View("Index");
@@ -59,11 +59,11 @@ namespace Lab3.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit([DataSourceRequest] DataSourceRequest request, Route route)
+        public async Task<IActionResult> EditAsync([DataSourceRequest] DataSourceRequest request, Route route)
         {
             if (ModelState.IsValid)
             {
-                route = planeTicketService.Edit(userEmail, route).Result;
+                route = await planeTicketService.Edit(userEmail, route);
                 if (route == null)
                 {
                     return View("Index");
@@ -73,9 +73,9 @@ namespace Lab3.Controllers
         }
 
         [HttpPost]
-        public IActionResult Delete([DataSourceRequest] DataSourceRequest request, Route route)
+        public async Task<IActionResult> DeleteAsync([DataSourceRequest] DataSourceRequest request, Route route)
         {
-            route = planeTicketService.Delete(userEmail, route).Result;
+            route = await planeTicketService.Delete(userEmail, route);
             if (route == null)
             {
                 return View("Index");

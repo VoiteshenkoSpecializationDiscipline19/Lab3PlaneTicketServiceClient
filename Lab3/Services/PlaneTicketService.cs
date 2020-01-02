@@ -12,8 +12,8 @@ namespace Lab3.Services
 {
     public class PlaneTicketService : IPlaneTicketService
     {
-        private String baseUri;
-        private String authUri;
+        private string baseUri;
+        private string authUri;
         private IPaymentService paymentService;
         private HttpClient client;
 
@@ -25,10 +25,10 @@ namespace Lab3.Services
             this.paymentService = paymentService;
             client = clientFactory.CreateClient();
         }
-        public async Task<Object> AuthorizeAsync(User user)
+        public async Task<object> AuthorizeAsync(User user)
         {
             var payment = await paymentService.PayForMethod(
-               new MethodUsageDates(DateTime.Now, DateTime.Now), "getUser");
+               new MethodUsageDates(DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)), "getUser");
 
             User userFullInfo = null;
 
@@ -51,7 +51,7 @@ namespace Lab3.Services
             List<Route> uniqueRoutes = null;
 
             var payment = await paymentService.PayForMethod(
-                new MethodUsageDates(DateTime.Now, DateTime.Now), "getFlightsInfo");
+                new MethodUsageDates(DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)), "getFlightsInfo");
 
             if (payment is PaymentResponse)
             {
@@ -83,11 +83,11 @@ namespace Lab3.Services
             return uniqueRoutes;
         }
 
-        public async Task<List<Route>> ReadData(String userEmail)
+        public async Task<List<Route>> ReadData(string userEmail)
         {
             List<Route> orders = null;
             var payment = await paymentService.PayForMethod(
-                new MethodUsageDates(DateTime.Now, DateTime.Now), "getFullUserFlightsInfo");
+                new MethodUsageDates(DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)), "getFullUserFlightsInfo");
 
             if (payment is PaymentResponse)
             {
@@ -102,10 +102,10 @@ namespace Lab3.Services
             return orders;
         }
 
-        public async Task<Route> Create(String userEmail, Route route)
+        public async Task<Route> Create(string userEmail, Route route)
         {
             var payment = await paymentService.PayForMethod(
-              new MethodUsageDates(DateTime.Now, DateTime.Now), "addFlight");
+              new MethodUsageDates(DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)), "addFlight");
 
             if (payment is PaymentResponse)
             {
@@ -123,10 +123,10 @@ namespace Lab3.Services
             return route;
         }
 
-        public async Task<Route> Edit(String userEmail, Route route)
+        public async Task<Route> Edit(string userEmail, Route route)
         {
             var payment = await paymentService.PayForMethod(
-             new MethodUsageDates(DateTime.Now, DateTime.Now), "updateFlight");
+             new MethodUsageDates(DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)), "updateFlight");
 
             if (payment is PaymentResponse)
             {
@@ -144,10 +144,10 @@ namespace Lab3.Services
             return route;
         }
 
-        public async Task<Route> Delete(String userEmail, Route route)
+        public async Task<Route> Delete(string userEmail, Route route)
         {
             var payment = await paymentService.PayForMethod(
-               new MethodUsageDates(DateTime.Now, DateTime.Now), "deleteFlight");
+               new MethodUsageDates(DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)), "deleteFlight");
             int code = 0;
 
             if (payment is PaymentResponse)

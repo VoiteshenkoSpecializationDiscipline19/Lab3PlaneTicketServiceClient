@@ -3,6 +3,7 @@ using Lab3.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 
 namespace Lab3.Controllers
 {
@@ -10,7 +11,7 @@ namespace Lab3.Controllers
     {
         private IPlaneTicketService planeTicketService;
 
-        public HomeController(IConfiguration configuration, IPlaneTicketService planeTicketService)
+        public HomeController(IPlaneTicketService planeTicketService)
         {
             this.planeTicketService = planeTicketService;
         }
@@ -22,10 +23,10 @@ namespace Lab3.Controllers
         }
 
         [HttpPost]
-        public IActionResult Authorize([Bind("Id")] User user)
+        public async Task<IActionResult> Authorize([Bind("Id")] User user)
         {
-            var authorizeResult = planeTicketService.AuthorizeAsync(user).Result;
-            if (authorizeResult is String error)
+            var authorizeResult = await planeTicketService.AuthorizeAsync(user);
+            if (authorizeResult is string error)
             {
                 return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
                 {

@@ -12,7 +12,7 @@ namespace Lab3.Services
 {
     public class PaymentService: IPaymentService
     {
-       private String baseUri;
+       private string baseUri;
        private HttpClient client;
 
         public PaymentService(IConfiguration configuration, IHttpClientFactory clientFactory)
@@ -21,7 +21,7 @@ namespace Lab3.Services
             client = clientFactory.CreateClient();
         }
 
-        public async Task<Object> PayForMethod(MethodUsageDates dates, string methodName)
+        public async Task<object> PayForMethod(MethodUsageDates dates, string methodName)
         {
             var jsonRequest = JsonConvert.SerializeObject(dates,
                 new JsonSerializerSettings
@@ -45,7 +45,7 @@ namespace Lab3.Services
             return paymentResponse;
         }
 
-        public bool MethodPaymentIsSuccessful(Object response, Object payment)
+        public bool MethodPaymentIsSuccessful(object response, object payment)
         {
             if(payment is ErrorViewModel)
             {

@@ -6,7 +6,7 @@ namespace Lab3.Services
 {
     public interface IPaymentService
     {
-        Task<Object> PayForMethod(MethodUsageDates dates, string methodName);
-        bool MethodPaymentIsSuccessful(Object response, Object payment);
+        Task<object> PayForMethod(MethodUsageDates dates, string methodName);
+        bool MethodPaymentIsSuccessful(object response, object payment);
     }
 }
